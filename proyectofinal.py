@@ -2,9 +2,9 @@ import random
 
 class Bacteria():
     def __init__(self):
-        self.id=random.randint(111,999)
+        self.id=random.randint(10,2000)
         self.raza=None
-        self.energia=0
+        self.energia=random.randint(111,999)
         self.resistente=False
         self.estado=True
     
@@ -24,21 +24,24 @@ class Bacteria():
         if isinstance(vivo,bool):
             self.estado=vivo
 
-    def crear_bacteria(self,raza,resistencia):
+    def crear_bacteria(self,raza,energia,resistencia):
         self.set_raza(raza)
+        self.set_energia(energia)
         self.set_resistente(resistencia)
 
     def Alimentar(self,Nutrientes_Ambiente,Nutrientes_a_consumir):
         if Nutrientes_Ambiente>=Nutrientes_a_consumir:
             self.energia+=Nutrientes_a_consumir
-            print(f"Se ha alimentado {Nutrientes_a_consumir} nutrientes")  
+            print(f"La bacteria {self.id} Se ha alimentado {Nutrientes_a_consumir} nutrientes")  
         else:
-            print("No se puede consumir mas nutrientes de los que hay en al celda")
+            print(f"La bacteria {self.id} no consumio, ya que no se puede consumir mas nutrientes de los que hay en al celda")
 
     def dividirse(self):
         if self.energia>=500:
             Nueva_celula= Bacteria()
-            Nueva_celula.crear_bacteria(self.raza,self.energia/2,self.resistente,True)
+            Nueva_celula.crear_bacteria(self.raza,self.energia/2,self.resistente)
+            self.energia=self.energia/2
+            return Nueva_celula
     def mutar(self):
         a=random.randint(1,10)
         if a==3 and self.resistente==True:
@@ -51,11 +54,13 @@ class Bacteria():
             print("No Muto la bacteria")
     
     def morir(self):
-        if self.energia<=100:
+        if self.energia<=100 and self.estado==True:
             self.estado=False
             print("La Bacteria a muerto")
+            return           
         if self.estado==True:
             print("La Bacteria sigue viva")
+            return
         else:
             print("la Bacteria esta muerta")
 
@@ -92,7 +97,10 @@ class Colonia():
     
 Bacteria1=Bacteria()
 Bacteria2=Bacteria()
-Bacteria1.crear_bacteria("a",True)
-Bacteria2.crear_bacteria("b",False)
+Bacteria1.crear_bacteria("a",Bacteria1.energia,True)
+Bacteria2.crear_bacteria("b",Bacteria2.energia,False)
 Bacteria1.Alimentar(200,100)
 Bacteria2.Alimentar(50,100)
+Bacteria3=Bacteria()
+print(Bacteria3.energia)
+Bacteria3.morir()
