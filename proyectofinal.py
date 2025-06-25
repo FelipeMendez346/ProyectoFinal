@@ -1,4 +1,10 @@
 import random
+import gi 
+gi.require_version("Gtk","4.0")
+from gi.repository import Gtk
+import matplotlib . pyplot as plt
+import numpy as np
+from matplotlib . patches import Patch  
 
 class Bacteria():
     def __init__(self):
@@ -24,9 +30,9 @@ class Bacteria():
         if isinstance(vivo,bool):
             self.estado=vivo
 
-    def crear_bacteria(self,raza,energia,resistencia):
+    def crear_bacteria(self,raza,energiaa,resistencia):
         self.set_raza(raza)
-        self.set_energia(energia)
+        self.set_energia(energiaa)
         self.set_resistente(resistencia)
 
     def Alimentar(self,Nutrientes_Ambiente,Nutrientes_a_consumir):
@@ -39,8 +45,8 @@ class Bacteria():
     def dividirse(self):
         if self.energia>=500:
             Nueva_celula= Bacteria()
-            Nueva_celula.crear_bacteria(self.raza,self.energia/2,self.resistente)
-            self.energia=self.energia/2
+            self.energia=self.energia//2
+            Nueva_celula.crear_bacteria(self.raza,self.energia,self.resistente)
             return Nueva_celula
     def mutar(self):
         a=random.randint(1,10)
@@ -67,16 +73,30 @@ class Bacteria():
 class Ambiente():
     def __init__(self):
         self.grilla=None
-        self.nutrientes=0
+        self.nutrientes=random.randint(100,1000)
         self.factor_ambiental=None
+        self.posicion=[]
 
+    def set_nutrientes(self,N):
+        if isinstance(N,int):
+            self.nutrientes=N
     def actualizar_nutrientes(self):
         pass
 
     def difundir_nutrientes(self):
+        nuevos_nutrientes=random.randint(10,500)
+        self.nutrientes+=nuevos_nutrientes
+    def aplicar_ambiente(self,n):
         pass
-    def aplicar_ambiente(self):
-        pass
+    def crear_espacio(self,n):
+        while n>0:
+            a=random.randint(0,5)
+            b=random.randint(0,5)
+            if [a,b]in posicion:
+                return
+            else:
+                self.posicion.append([a,b])
+                    
 
 class Colonia():
     def __init__(self):
@@ -84,23 +104,85 @@ class Colonia():
         self.Ambiente=None
 
     def paso():
-        pass
+        for i in Bacterias:
+            Bacterias[i].energia-=10
+            if Bacterias[i].energia<=100:
+                Bacterias[i].morir
+        
+            
 
     def reporte_estado():
         pass
 
     def exportar_csv():
         pass
+
+
+QUIT = False
+
+def quit_(window):
+    global QUIT
+    QUIT = True
+
+
+class simulacion(Gtk.Window):
+    def __init__(self):
+        super().__init__(title="Simulacion")
+        self.connect("close-request",quit_)
+
+    grilla = np.zeros((5, 5))
+
+    def crear_grillas(self,posiciones):
+        
+
+    
+    cmap = plt.cm.get_cmap('Set1', 5)
+    fig, ax = plt.subplots(figsize=(6, 6))
+    cax = ax.matshow(grilla, cmap=cmap)
+
+    legend_elements = [
+        Patch(facecolor=cmap(1/5), label='Bacteria activa'),
+        Patch(facecolor=cmap(2/5), label='Bacteria muerta'),
+        Patch(facecolor=cmap(3/5), label='Bacteria resistente'),
+        Patch(facecolor=cmap(4/5), label='Biofilm'),]
+    ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.45, 1))
+
+    ax.set_xticks(np.arange(0, 5, 1))
+    ax.set_yticks(np.arange(0, 5, 1))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.grid(color='gray', linestyle='-', linewidth=0.5)
+    for i in range(5):
+        for j in range(5):
+            val = grilla[i, j]
+            if val > 0:
+                ax.text(j, i, int(val), va='center', ha='center', color='white')
+    plt.title("grilla 5x5")
+    plt.tight_layout()
+    plt.show()
+
+
     
 
-#main    
+
     
+
+        
+        
+
+#main    
+ambiente=Ambiente()
 Bacteria1=Bacteria()
+print(Bacteria1.energia)
 Bacteria2=Bacteria()
 Bacteria1.crear_bacteria("a",Bacteria1.energia,True)
 Bacteria2.crear_bacteria("b",Bacteria2.energia,False)
-Bacteria1.Alimentar(200,100)
-Bacteria2.Alimentar(50,100)
+Bacteria1.Alimentar(ambiente.nutrientes,400)
+Bacteria2.Alimentar(ambiente.nutrientes,100)
 Bacteria3=Bacteria()
+print(Bacteria3.raza)
+Bacteria3=Bacteria1.dividirse()
+print(Bacteria1.energia)
+print(Bacteria3.raza)
 print(Bacteria3.energia)
 Bacteria3.morir()
