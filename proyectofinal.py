@@ -2,11 +2,11 @@ import random
 
 class Bacteria():
     def __init__(self):
-        self.id=0
+        self.id=random.randint(111,999)
         self.raza=None
         self.energia=0
         self.resistente=False
-        self.estado=False
+        self.estado=True
     
     def set_id(self,id):
         if isinstance(id,int):
@@ -25,7 +25,6 @@ class Bacteria():
             self.estado=vivo
 
     def crear_bacteria(self,id,raza,energia,resistencia,estado):
-        self.set_id(id)
         self.set_raza(raza)
         self.set_energia(energia)
         self.set_resistente(resistencia)
@@ -38,14 +37,28 @@ class Bacteria():
             print("No se puede consumir mas nutrientes de los que hay en al celda")
 
     def dividirse(self):
-        if self.energia>=10:
+        if self.energia>=500:
             Nueva_celula= Bacteria()
-            Nueva_celula.crear_bacteria(self.id+1,self.raza,self.energia/2,self.resistente,True)
+            Nueva_celula.crear_bacteria(self.raza,self.energia/2,self.resistente,True)
     def mutar(self):
-
+        a=random.randint(1,10)
+        if a==3 and self.resistente==True:
+            self.resistente=False
+            print("Se ha mutado y se ha quitado la resistencia a antibioticos")
+        if a==7 and self.resistente==False:
+            self.resistente=True
+            print("Se ha mutado y se ha agregado la resistencia a antibioticos")
+        else:
+            print("No Muto la bacteria")
     
     def morir(self):
-        
+        if self.energia<=100:
+            self.estado=False
+            print("La Bacteria a muerto")
+        if self.estado==True:
+            print("La Bacteria sigue viva")
+        else:
+            print("la Bacteria esta muerta")
 
 class Ambiente():
     def __init__(self):
