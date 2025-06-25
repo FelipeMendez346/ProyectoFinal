@@ -18,21 +18,20 @@ class Bacteria():
         if isinstance(energia,int):
             self.energia=energia
     def set_resistente(self,es):
-        if isinstance(resistente,bool):
+        if isinstance(es,bool):
             self.resistente=es
     def set_estado(self,vivo):
-        if isinstance(estado,bool):
+        if isinstance(vivo,bool):
             self.estado=vivo
 
-    def crear_bacteria(self,id,raza,energia,resistencia,estado):
+    def crear_bacteria(self,raza,resistencia):
         self.set_raza(raza)
-        self.set_energia(energia)
         self.set_resistente(resistencia)
-        self.set_estado(estado)
 
     def Alimentar(self,Nutrientes_Ambiente,Nutrientes_a_consumir):
         if Nutrientes_Ambiente>=Nutrientes_a_consumir:
             self.energia+=Nutrientes_a_consumir
+            print(f"Se ha alimentado {Nutrientes_a_consumir} nutrientes")  
         else:
             print("No se puede consumir mas nutrientes de los que hay en al celda")
 
@@ -67,11 +66,12 @@ class Ambiente():
         self.factor_ambiental=None
 
     def actualizar_nutrientes(self):
+        pass
 
     def difundir_nutrientes(self):
-
+        pass
     def aplicar_ambiente(self):
-
+        pass
 
 class Colonia():
     def __init__(self):
@@ -79,12 +79,20 @@ class Colonia():
         self.Ambiente=None
 
     def paso():
+        pass
 
     def reporte_estado():
+        pass
 
     def exportar_csv():
+        pass
     
 
 #main    
     
-
+Bacteria1=Bacteria()
+Bacteria2=Bacteria()
+Bacteria1.crear_bacteria("a",True)
+Bacteria2.crear_bacteria("b",False)
+Bacteria1.Alimentar(200,100)
+Bacteria2.Alimentar(50,100)
