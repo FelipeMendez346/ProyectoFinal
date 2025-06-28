@@ -108,12 +108,21 @@ class Colonia():
             Bacterias[i].energia-=10
             if Bacterias[i].energia<=100:
                 Bacterias[i].morir
-        
+
+    def set_Ambiente(self,ambiente):
+        self.Ambiente=ambiente
             
 
     def reporte_estado():
-        pass
-
+        suma_estados=0
+        for i in Bacterias:
+            if Bacterias[i]==True:
+                suma_estados+=1
+            else:
+                suma_estados+=0
+            total_bacterias=+1
+        print(f"La cantidad de bacterias que hay vivas son {suma_estados}, de un total de {total_bacterias}")
+        
     def exportar_csv():
         pass
 
