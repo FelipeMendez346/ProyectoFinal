@@ -5,6 +5,8 @@ from gi.repository import Gtk
 import matplotlib . pyplot as plt
 import numpy as np
 from matplotlib . patches import Patch  
+import csv
+archivo="reporte.csv"
 
 class Bacteria():
     def __init__(self):
@@ -106,6 +108,7 @@ class Colonia():
         self.Bacterias=[]
         self.Ambiente=None
         self.lugar=None
+        self.tipo=0
 
     def agregar_bacteria(self,Bacteriaa):
         self.Bacterias.append(Bacteriaa)
@@ -115,19 +118,16 @@ class Colonia():
             self.Bacterias[i].energia-=10
             if self.Bacterias[i].energia<=100:
                 self.Bacterias[i].morir()
-            if len(self.Bacterias)>0:
+        if len(self.Bacterias)>0:
                 mov=random.randint(1,4)
                 if mov==1:
-                    self.lugar[0]+=1
+                    self.lugar[0][0]+=1
                 if mov==2:
-                    self.lugar[1]+=1
+                    self.lugar[0][1]+=1
                 if mov==3:
-                    self.lugar[0]-=1
+                    self.lugar[0][0]-=1
                 if mov==4:
-                    self.lugar[1]-=1
-                else:
-                    print("error")
-
+                    self.lugar[0][1]-=1
                 
 
 
@@ -145,8 +145,25 @@ class Colonia():
             total_bacterias=+1
         print(f"La cantidad de bacterias que hay vivas son {suma_estados}, de un total de {total_bacterias}")
 
-    def exportar_csv(self):
-        pass
+    def exportar_csv(self,archivo):
+        with open(archivo,mode='w',newline='',encoding='utf-8')as archivo_csv:
+            escritor=csv.writer(archivo_csv)
+            escritor.writerow([
+                'id_bacteria', 
+                'raza', 
+                'energia', 
+                'es_resistente', 
+                'esta_viva', 
+            ])
+            for bacteria in self.Bacterias:
+                fila = [
+                    bacteria.id,
+                    bacteria.raza,
+                    bacteria.energia,
+                    bacteria.resistente,
+                    bacteria.estado,
+                ]
+                escritor.writerow(fila)
 
 
 QUIT = False
@@ -225,4 +242,5 @@ colonia.lugar=ambiente.posicion
 print(colonia.lugar)
 colonia.paso()
 print(colonia.lugar)
+colonia.exportar_csv(archivo)
 
