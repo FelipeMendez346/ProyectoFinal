@@ -80,40 +80,62 @@ class Ambiente():
     def set_nutrientes(self,N):
         if isinstance(N,int):
             self.nutrientes=N
-    def actualizar_nutrientes(self):
-        pass
+    def actualizar_nutrientes(self,nutriente):
+        for posicion in self.posicion:
+            for bacteria in posicion.bacterias:
+                bacteria.energia+=nutriente       
 
     def difundir_nutrientes(self):
         nuevos_nutrientes=random.randint(10,500)
         self.nutrientes+=nuevos_nutrientes
     def aplicar_ambiente(self,n):
         pass
-    def crear_espacio(self,n):
+    def crear_espacio(self,n,k):
         while n>0:
             a=random.randint(0,5)
             b=random.randint(0,5)
-            if [a,b]in posicion:
+            if [a,b]in self.posicion:
                 return
             else:
-                self.posicion.append([a,b])
+                self.posicion.append([a,b,k])
+                n=n-1
                     
 
 class Colonia():
     def __init__(self):
         self.Bacterias=[]
         self.Ambiente=None
+        self.lugar=None
 
-    def paso():
-        for i in Bacterias:
-            Bacterias[i].energia-=10
-            if Bacterias[i].energia<=100:
-                Bacterias[i].morir
+    def agregar_bacteria(self,Bacteriaa):
+        self.Bacterias.append(Bacteriaa)
+
+    def paso(self):
+        for i in range(len(self.Bacterias)):
+            self.Bacterias[i].energia-=10
+            if self.Bacterias[i].energia<=100:
+                self.Bacterias[i].morir()
+            if len(self.Bacterias)>0:
+                mov=random.randint(1,4)
+                if mov==1:
+                    self.lugar[0]+=1
+                if mov==2:
+                    self.lugar[1]+=1
+                if mov==3:
+                    self.lugar[0]-=1
+                if mov==4:
+                    self.lugar[1]-=1
+                else:
+                    print("error")
+
+                
+
 
     def set_Ambiente(self,ambiente):
         self.Ambiente=ambiente
             
 
-    def reporte_estado():
+    def reporte_estado(self):
         suma_estados=0
         for i in Bacterias:
             if Bacterias[i]==True:
@@ -122,8 +144,8 @@ class Colonia():
                 suma_estados+=0
             total_bacterias=+1
         print(f"La cantidad de bacterias que hay vivas son {suma_estados}, de un total de {total_bacterias}")
-        
-    def exportar_csv():
+
+    def exportar_csv(self):
         pass
 
 
@@ -133,7 +155,7 @@ def quit_(window):
     global QUIT
     QUIT = True
 
-
+"""
 class simulacion(Gtk.Window):
     def __init__(self):
         super().__init__(title="Simulacion")
@@ -143,7 +165,6 @@ class simulacion(Gtk.Window):
 
     def crear_grillas(self,posiciones):
         
-
     
     cmap = plt.cm.get_cmap('Set1', 5)
     fig, ax = plt.subplots(figsize=(6, 6))
@@ -169,7 +190,7 @@ class simulacion(Gtk.Window):
     plt.title("grilla 5x5")
     plt.tight_layout()
     plt.show()
-
+"""
 
     
 
@@ -195,3 +216,13 @@ print(Bacteria1.energia)
 print(Bacteria3.raza)
 print(Bacteria3.energia)
 Bacteria3.morir()
+colonia=Colonia()
+colonia.agregar_bacteria(Bacteria1)
+colonia.agregar_bacteria(Bacteria2)
+colonia.agregar_bacteria(Bacteria3)
+ambiente.crear_espacio(1,2)
+colonia.lugar=ambiente.posicion
+print(colonia.lugar)
+colonia.paso()
+print(colonia.lugar)
+
