@@ -7,15 +7,16 @@ import numpy as np
 from matplotlib . patches import Patch  
 import csv
 archivo="reporte.csv"
-
+#clase bacteria
 class Bacteria():
+    #inicializacion de datos 
     def __init__(self):
         self.id=random.randint(10,2000)
         self.raza=None
         self.energia=random.randint(111,999)
         self.resistente=False
         self.estado=True
-    
+    #funciones para colocar los datos
     def set_id(self,id):
         if isinstance(id,int):
             self.id=id
@@ -31,25 +32,26 @@ class Bacteria():
     def set_estado(self,vivo):
         if isinstance(vivo,bool):
             self.estado=vivo
-
+    #crea una bacteria
     def crear_bacteria(self,raza,energiaa,resistencia):
         self.set_raza(raza)
         self.set_energia(energiaa)
         self.set_resistente(resistencia)
-
+    #comprobacion de si existen nutrientes para alimentar a las bacterias
     def Alimentar(self,Nutrientes_Ambiente,Nutrientes_a_consumir):
         if Nutrientes_Ambiente>=Nutrientes_a_consumir:
             self.energia+=Nutrientes_a_consumir
             print(f"La bacteria {self.id} Se ha alimentado {Nutrientes_a_consumir} nutrientes")  
         else:
             print(f"La bacteria {self.id} no consumio, ya que no se puede consumir mas nutrientes de los que hay en al celda")
-
+    #crea una nueva bacteria a partir de una ya existente
     def dividirse(self):
         if self.energia>=500:
             Nueva_celula= Bacteria()
             self.energia=self.energia//2
             Nueva_celula.crear_bacteria(self.raza,self.energia,self.resistente)
             return Nueva_celula
+    #random para mutacion de resistencia a antibioticos
     def mutar(self):
         a=random.randint(1,10)
         if a==3 and self.resistente==True:
@@ -60,7 +62,7 @@ class Bacteria():
             print("Se ha mutado y se ha agregado la resistencia a antibioticos")
         else:
             print("No Muto la bacteria")
-    
+    #si pierde energia se muere
     def morir(self):
         if self.energia<=100 and self.estado==True:
             self.estado=False
@@ -71,7 +73,7 @@ class Bacteria():
             return
         else:
             print("la Bacteria esta muerta")
-
+#clase ambiente
 class Ambiente():
     def __init__(self):
         self.grilla=None
@@ -82,16 +84,19 @@ class Ambiente():
     def set_nutrientes(self,N):
         if isinstance(N,int):
             self.nutrientes=N
+    #actuializa la energia las bacterias con la del ambiente
     def actualizar_nutrientes(self,nutriente):
         for posicion in self.posicion:
             for bacteria in posicion.bacterias:
                 bacteria.energia+=nutriente       
-
+    #crea un random para agregar nutrientes
     def difundir_nutrientes(self):
         nuevos_nutrientes=random.randint(10,500)
         self.nutrientes+=nuevos_nutrientes
+    #sin definir
     def aplicar_ambiente(self,n):
         pass
+    #crea un valor random para agregar una posicion aleatoria
     def crear_espacio(self,n,k):
         while n>0:
             a=random.randint(0,5)
@@ -101,18 +106,24 @@ class Ambiente():
             else:
                 self.posicion.append([a,b,k])
                 n=n-1
+    
                     
-
+#clase colonia
 class Colonia():
     def __init__(self):
         self.Bacterias=[]
         self.Ambiente=None
         self.lugar=None
         self.tipo=0
+    
+    def set_Ambiente(self,ambiente):
+        self.Ambiente=ambiente
+            
 
+    #agrega bacteria a la colonia
     def agregar_bacteria(self,Bacteriaa):
         self.Bacterias.append(Bacteriaa)
-
+    #comprobacion de movimiento de la colonia en el ambiente
     def paso(self):
         for i in range(len(self.Bacterias)):
             self.Bacterias[i].energia-=10
@@ -121,20 +132,18 @@ class Colonia():
         if len(self.Bacterias)>0:
                 mov=random.randint(1,4)
                 if mov==1:
-                    self.lugar[0][0]+=1
+                    if (self.lugar[0][0]+=1)[2]==0:
+                        self.lugar[0][0]+=1
                 if mov==2:
-                    self.lugar[0][1]+=1
+                    if (self.lugar[0][1]+=1)[2]==0:
+                        self.lugar[0][1]+=1
                 if mov==3:
-                    self.lugar[0][0]-=1
+                    if (self.lugar[0][0]-=1)[2]==0:
+                        self.lugar[0][0]-=1
                 if mov==4:
-                    self.lugar[0][1]-=1
-                
-
-
-    def set_Ambiente(self,ambiente):
-        self.Ambiente=ambiente
-            
-
+                    if (self.lugar[0][1]-=1)[2]==0:
+                        self.lugar[0][1]-=1
+    #reporte de si existen bacterias vivas o estan muertas en la casilla             
     def reporte_estado(self):
         suma_estados=0
         for i in Bacterias:
@@ -144,7 +153,8 @@ class Colonia():
                 suma_estados+=0
             total_bacterias=+1
         print(f"La cantidad de bacterias que hay vivas son {suma_estados}, de un total de {total_bacterias}")
-
+    
+    #exportacion de archivo cvs
     def exportar_csv(self,archivo):
         with open(archivo,mode='w',newline='',encoding='utf-8')as archivo_csv:
             escritor=csv.writer(archivo_csv)
@@ -172,17 +182,25 @@ def quit_(window):
     global QUIT
     QUIT = True
 
-"""
 class simulacion(Gtk.Window):
     def __init__(self):
         super().__init__(title="Simulacion")
         self.connect("close-request",quit_)
 
-    grilla = np.zeros((5, 5))
-
-    def crear_grillas(self,posiciones):
-        
     
+
+    def crear_grillas(self,ambiente):
+        grilla = np.zeros((5, 5))
+        print(grilla)
+        for i in range(len(ambiente.posicion)):
+            x=ambiente.posicion[i][0]
+            y=ambiente.posicion[i][1]
+            k=ambiente.posicion[i][2]
+            grilla[x,y]=k
+        print(grilla)
+
+        
+"""    
     cmap = plt.cm.get_cmap('Set1', 5)
     fig, ax = plt.subplots(figsize=(6, 6))
     cax = ax.matshow(grilla, cmap=cmap)
@@ -200,7 +218,7 @@ class simulacion(Gtk.Window):
     ax.set_yticklabels([])
     ax.grid(color='gray', linestyle='-', linewidth=0.5)
     for i in range(5):
-        for j in range(5):
+        for j in range(5):                                                                                                                                                                                                                                             
             val = grilla[i, j]
             if val > 0:
                 ax.text(j, i, int(val), va='center', ha='center', color='white')
@@ -242,5 +260,6 @@ colonia.lugar=ambiente.posicion
 print(colonia.lugar)
 colonia.paso()
 print(colonia.lugar)
-colonia.exportar_csv(archivo)
+simulacion.crear_grillas(ambiente)
+
 
