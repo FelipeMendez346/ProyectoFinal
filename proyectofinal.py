@@ -6,6 +6,7 @@ import matplotlib . pyplot as plt
 import numpy as np
 from matplotlib . patches import Patch  
 import csv
+import re
 archivo="reporte.csv"
 #clase bacteria
 class Bacteria():
@@ -189,11 +190,9 @@ def quit_(window):
     global QUIT
     QUIT = True
 
-class simulacion():
+class simulacion(Gtk.Application):
     def __init__(self):
-        super().__init__(title="Simulacion")
-        self.connect("close-request",quit_)
-
+        super().__init__(application_id="org.ejemplo.App")
     
     def crear_grillas(self,ambiente):
         #crea grilla vacia
@@ -208,6 +207,61 @@ class simulacion():
                 grilla[x,y]=k
         print(grilla)
         return grilla
+
+    def do_activate(self):
+        self.window = Gtk.ApplicationWindow(application=self)
+        self.window.set_title("Lab de Bacterias simuladas")
+        self.window.set_default_size(480, 360)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.window.set_child(box)
+
+        self.Bacterias_iniciales = Gtk.Entry()
+        self.Bacterias_iniciales.set_text("Indique con cuantas bacterias va a comenzar")
+        box.append(self.Bacterias_iniciales)
+        
+        self.Antibioticos=Gtk.Entry()
+        self.Antibioticos.set_text("Indique cuantos antibioticos quiere colocar")
+        box.append(self.Antibioticos)
+
+        self.Cantidad_de_pasos=Gtk.Entry()
+        self.Cantidad_de_pasos.set_text("Indique cuantos pasos va a realizar")
+        box.append(self.Cantidad_de_pasos)
+
+        self.Boton_Iniciar = Gtk.Button(label="Registrar")
+        self.Boton_Iniciar.connect("clicked", self.Iniciar_clicked)
+        box.append(self.Boton_Iniciar)
+
+        self.window.show()
+
+    def Iniciar_clicked(self,Button):
+        Bacterias=self.Bacterias_iniciales.get_text()
+        Antibioticos=self.Antibioticos.get_text()
+        Pasos=self.Cantidad_de_pasos.get_text()
+        if not re.fullmatch(r"[0-9]+", Bacterias):
+            self.mostrar_dialogo("Error","La cantidad de bacterias debe ser un numero entero")
+            return
+        if not re.fullmatch(r"[0-9]+", Antibioticos):
+            self.mostrar_dialogo("Error","La cantidad de antibioticos debe ser un numero entero")
+            return
+        if not re.fullmatch(r"[0-9]+", Pasos):
+            self.mostrar_dialogo("Error","La cantidad de bacterias debe ser un numero entero")
+            return
+
+    def mostrar_dialogo(self, title, message):
+        dialogo = Gtk.MessageDialog(
+            transient_for=self.window,
+            modal=True,
+            title=title,
+            text=message,
+            buttons=Gtk.ButtonsType.OK,
+        )
+        dialogo.connect("response",self.cerrar_dialogo)
+        dialogo.present()
+    def cerrar_dialogo(self, widget, action):
+        widget.destroy()
+
+
 
         
 """    
@@ -273,5 +327,8 @@ colonia.paso()
 print(colonia.lugar)
 a=simulacion.crear_grillas(None,ambiente)
 
+if __name__ == "__main__":
+    app = simulacion()
+    app.run()
 
 
