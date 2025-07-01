@@ -113,36 +113,43 @@ class Colonia():
     def __init__(self):
         self.Bacterias=[]
         self.Ambiente=None
-        self.lugar=None
-        self.tipo=0
+        self.lugar=[1,1]
+        self.tipo=1 #inicializa en 1 que significa que es bacteria
     
     def set_Ambiente(self,ambiente):
         self.Ambiente=ambiente
-            
+
+    def set_lugar(self,posicion):
+        self.lugar=posicion    
 
     #agrega bacteria a la colonia
     def agregar_bacteria(self,Bacteriaa):
         self.Bacterias.append(Bacteriaa)
+
+    def crear_colonia(self):
+        nueva_colonia=Colonia()
+        for Bacteria in self.Bacterias:
+            if Bacteria.energia>=500:
+                nueva_bacteria=Bacteria.dividirse()
+                nueva_colonia.agregar_bacteria(nueva_bacteria)
+        return nueva_colonia
     #comprobacion de movimiento de la colonia en el ambiente
     def paso(self):
         for i in range(len(self.Bacterias)):
             self.Bacterias[i].energia-=10
-            if self.Bacterias[i].energia<=100:
-                self.Bacterias[i].morir()
-        if len(self.Bacterias)>0:
-                mov=random.randint(1,4)
-                if mov==1:
-                    if (self.lugar[0][0]+=1)[2]==0:
-                        self.lugar[0][0]+=1
-                if mov==2:
-                    if (self.lugar[0][1]+=1)[2]==0:
-                        self.lugar[0][1]+=1
-                if mov==3:
-                    if (self.lugar[0][0]-=1)[2]==0:
-                        self.lugar[0][0]-=1
-                if mov==4:
-                    if (self.lugar[0][1]-=1)[2]==0:
-                        self.lugar[0][1]-=1
+            self.Bacterias[i].morir()
+        if len(self.Bacterias) > 0:
+            mov = random.randint(1, 4)
+            x=self.lugar[0]
+            y=self.lugar[1]
+            if mov == 1 and x < 4: 
+                self.lugar[0] += 1
+            elif mov == 2 and y < 4:  
+                self.lugar[1] += 1
+            elif mov == 3 and x > 0: 
+                self.lugar[0] -= 1
+            elif mov == 4 and y > 0:  
+                self.lugar[1] -= 1
     #reporte de si existen bacterias vivas o estan muertas en la casilla             
     def reporte_estado(self):
         suma_estados=0
@@ -182,13 +189,12 @@ def quit_(window):
     global QUIT
     QUIT = True
 
-class simulacion(Gtk.Window):
+class simulacion():
     def __init__(self):
         super().__init__(title="Simulacion")
         self.connect("close-request",quit_)
 
     
-
     def crear_grillas(self,ambiente):
         grilla = np.zeros((5, 5))
         print(grilla)
@@ -255,11 +261,11 @@ colonia=Colonia()
 colonia.agregar_bacteria(Bacteria1)
 colonia.agregar_bacteria(Bacteria2)
 colonia.agregar_bacteria(Bacteria3)
-ambiente.crear_espacio(1,2)
-colonia.lugar=ambiente.posicion
+ambiente.crear_espacio(1,1)
+colonia.lugar=ambiente.posicion[0]
 print(colonia.lugar)
 colonia.paso()
 print(colonia.lugar)
-simulacion.crear_grillas(ambiente)
+simulacion.crear_grillas(None,ambiente)
 
 
