@@ -99,8 +99,8 @@ class Ambiente():
     #crea un valor random para agregar una posicion aleatoria
     def crear_espacio(self,n,k):
         while n>0:
-            a=random.randint(0,5)
-            b=random.randint(0,5)
+            a=random.randint(0,4)
+            b=random.randint(0,4)
             if [a,b]in self.posicion:
                 return
             else:
@@ -196,9 +196,12 @@ class simulacion():
 
     
     def crear_grillas(self,ambiente):
+        #crea grilla vacia
         grilla = np.zeros((5, 5))
         print(grilla)
+        #añade a cada punto distinto un dato de una colonia 
         for i in range(len(ambiente.posicion)):
+            print(ambiente.posicion[i])
             x=ambiente.posicion[i][0]
             y=ambiente.posicion[i][1]
             k=ambiente.posicion[i][2]
@@ -261,7 +264,7 @@ colonia=Colonia()
 colonia.agregar_bacteria(Bacteria1)
 colonia.agregar_bacteria(Bacteria2)
 colonia.agregar_bacteria(Bacteria3)
-ambiente.crear_espacio(1,1)
+ambiente.crear_espacio(10,1)
 colonia.lugar=ambiente.posicion[0]
 print(colonia.lugar)
 colonia.paso()
