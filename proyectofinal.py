@@ -198,15 +198,16 @@ class simulacion():
     def crear_grillas(self,ambiente):
         #crea grilla vacia
         grilla = np.zeros((5, 5))
-        print(grilla)
         #añade a cada punto distinto un dato de una colonia 
         for i in range(len(ambiente.posicion)):
             print(ambiente.posicion[i])
             x=ambiente.posicion[i][0]
             y=ambiente.posicion[i][1]
             k=ambiente.posicion[i][2]
-            grilla[x,y]=k
+            if grilla[x,y]==0:
+                grilla[x,y]=k
         print(grilla)
+        return grilla
 
         
 """    
@@ -265,10 +266,12 @@ colonia.agregar_bacteria(Bacteria1)
 colonia.agregar_bacteria(Bacteria2)
 colonia.agregar_bacteria(Bacteria3)
 ambiente.crear_espacio(10,1)
+ambiente.crear_espacio(2,2)
 colonia.lugar=ambiente.posicion[0]
 print(colonia.lugar)
 colonia.paso()
 print(colonia.lugar)
-simulacion.crear_grillas(None,ambiente)
+a=simulacion.crear_grillas(None,ambiente)
+
 
 
