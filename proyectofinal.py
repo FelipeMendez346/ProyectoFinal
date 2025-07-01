@@ -33,10 +33,35 @@ class Bacteria():
     def set_estado(self,vivo):
         if isinstance(vivo,bool):
             self.estado=vivo
+
+    def random_raza(self):
+        n=random.randint(1,3)
+        R=None
+        if n==1:
+            R="cocos"
+        elif n==2:
+            R="Bacilo"
+        elif n==3:
+            R="Espirilos"
+        else:
+            print("Error al crear raza")
+            return
+        return R
+
+    def random_resistencia(self):
+        n=random.randint(1,2)
+        if n==1:
+            es=True
+        elif n==2:
+            es=False
+        else:
+            print("Erro al crear random en resistencia")
+            return
+        return es
+
     #crea una bacteria
-    def crear_bacteria(self,raza,energiaa,resistencia):
+    def crear_bacteria(self,raza,resistencia):
         self.set_raza(raza)
-        self.set_energia(energiaa)
         self.set_resistente(resistencia)
     #comprobacion de si existen nutrientes para alimentar a las bacterias
     def Alimentar(self,Nutrientes_Ambiente,Nutrientes_a_consumir):
@@ -50,7 +75,8 @@ class Bacteria():
         if self.energia>=500:
             Nueva_celula= Bacteria()
             self.energia=self.energia//2
-            Nueva_celula.crear_bacteria(self.raza,self.energia,self.resistente)
+            Nueva_celula.crear_bacteria(self.raza,self.resistente)
+            Nueva_celula.set_energia(self.energia)
             return Nueva_celula
     #random para mutacion de resistencia a antibioticos
     def mutar(self):
@@ -216,8 +242,12 @@ class simulacion(Gtk.Application):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.window.set_child(box)
 
+        self.Colonias_iniciales= Gtk.Entry()
+        self.Colonias_iniciales.set_text("Indique la cantidad de Colonias que quiere comenzar")
+        box.append(self.Colonias_iniciales)
+
         self.Bacterias_iniciales = Gtk.Entry()
-        self.Bacterias_iniciales.set_text("Indique con cuantas bacterias va a comenzar")
+        self.Bacterias_iniciales.set_text("Indique con cuantas bacterias por colonia quiere comenzar")
         box.append(self.Bacterias_iniciales)
         
         self.Antibioticos=Gtk.Entry()
@@ -247,6 +277,47 @@ class simulacion(Gtk.Application):
         if not re.fullmatch(r"[0-9]+", Pasos):
             self.mostrar_dialogo("Error","La cantidad de bacterias debe ser un numero entero")
             return
+        else:
+            n=int(Bacterias)
+            m=int()
+            ambiente_simulado=Ambiente()
+            while m>0:
+                temp_colonia=colonia()
+                while n>0:
+                    temp_bacteria=Bacteria()
+                    Raz=Bacteria.random_raza()
+                    es=Bacteria.random_resistencia()
+                    temp_bacteria=temp_bacteria.crear_bacteria(Raz,es)
+                m-=1
+                agregar_bacteria(temp_bacteria)                
+            self.crear_grillas()
+
+        
+    def graficar(self):
+        cmap = plt.cm.get_cmap('Set1', 5)
+        fig, ax = plt.subplots(figsize=(6, 6))
+        cax = ax.matshow(grilla, cmap=cmap)
+
+        legend_elements = [
+            Patch(facecolor=cmap(1/5), label='Bacteria activa'),
+            Patch(facecolor=cmap(2/5), label='Bacteria muerta'),
+            Patch(facecolor=cmap(3/5), label='Bacteria resistente'),
+            Patch(facecolor=cmap(4/5), label='Biofilm'),]
+        ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.45, 1))
+
+        ax.set_xticks(np.arange(0, 5, 1))
+        ax.set_yticks(np.arange(0, 5, 1))
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.grid(color='gray', linestyle='-', linewidth=0.5)
+        for i in range(5):
+            for j in range(5):                                                                                                                                                                                                                                             
+                val = grilla[i, j]
+                if val > 0:
+                    ax.text(j, i, int(val), va='center', ha='center', color='white')
+        plt.title("grilla 5x5")
+        plt.tight_layout()
+        plt.show()    
 
     def mostrar_dialogo(self, title, message):
         dialogo = Gtk.MessageDialog(
@@ -263,33 +334,9 @@ class simulacion(Gtk.Application):
 
 
 
-        
-"""    
-    cmap = plt.cm.get_cmap('Set1', 5)
-    fig, ax = plt.subplots(figsize=(6, 6))
-    cax = ax.matshow(grilla, cmap=cmap)
+            
+    
 
-    legend_elements = [
-        Patch(facecolor=cmap(1/5), label='Bacteria activa'),
-        Patch(facecolor=cmap(2/5), label='Bacteria muerta'),
-        Patch(facecolor=cmap(3/5), label='Bacteria resistente'),
-        Patch(facecolor=cmap(4/5), label='Biofilm'),]
-    ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.45, 1))
-
-    ax.set_xticks(np.arange(0, 5, 1))
-    ax.set_yticks(np.arange(0, 5, 1))
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.grid(color='gray', linestyle='-', linewidth=0.5)
-    for i in range(5):
-        for j in range(5):                                                                                                                                                                                                                                             
-            val = grilla[i, j]
-            if val > 0:
-                ax.text(j, i, int(val), va='center', ha='center', color='white')
-    plt.title("grilla 5x5")
-    plt.tight_layout()
-    plt.show()
-"""
 
     
 
@@ -304,8 +351,8 @@ ambiente=Ambiente()
 Bacteria1=Bacteria()
 print(Bacteria1.energia)
 Bacteria2=Bacteria()
-Bacteria1.crear_bacteria("a",Bacteria1.energia,True)
-Bacteria2.crear_bacteria("b",Bacteria2.energia,False)
+Bacteria1.crear_bacteria("a",True)
+Bacteria2.crear_bacteria("b",False)
 Bacteria1.Alimentar(ambiente.nutrientes,400)
 Bacteria2.Alimentar(ambiente.nutrientes,100)
 Bacteria3=Bacteria()
