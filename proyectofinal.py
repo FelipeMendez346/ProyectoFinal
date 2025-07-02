@@ -315,6 +315,8 @@ class simulacion(Gtk.Application):
         else:
             n=int(Bacterias)
             m=int(Colonias)
+            o=int(Antibioticos)
+            p=int(Pasos)
             ambiente_simulado=Ambiente()
             while m>0:
                 temp_colonia=Colonia()
@@ -331,7 +333,10 @@ class simulacion(Gtk.Application):
                 temp_colonia.set_Ambiente(ambiente_simulado)
                 ambiente_simulado.agregar_colonia(temp_colonia)
                 ambiente_simulado.posicion.append(temp_colonia.lugar)
-            
+            while o>0:
+                temp_antibiotico=ambiente_simulado.crear_espacio(1,3)
+                ambiente_simulado.posicion.append(temp_antibiotico)
+                o-=1
             temp_colonia.exportar_csv(archivo)                
             self.crear_grillas(ambiente_simulado)
 
