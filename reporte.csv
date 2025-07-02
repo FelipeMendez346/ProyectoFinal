@@ -1,13 +1,1 @@
 id_bacteria,raza,energia,es_resistente,esta_viva
-"Colonia en [0,2]"
-1282,Bacilo,730,True,True
-1189,Bacilo,124,False,True
-1679,Espirilos,734,False,True
-"Colonia en [1,4]"
-1883,cocos,450,False,True
-1747,Espirilos,884,True,True
-1095,cocos,257,False,True
-"Colonia en [3,2]"
-116,Bacilo,296,True,True
-1169,Bacilo,378,True,True
-766,cocos,647,True,True
