@@ -81,7 +81,7 @@ class Bacteria():
     #random para mutacion de resistencia a antibioticos
     def mutar(self):
         a=random.randint(1,10)
-        if a==3 and self.resistente==True:
+        if a<=4 and self.resistente==True:
             self.resistente=False
             print("Se ha mutado y se ha quitado la resistencia a antibioticos")
         if a==7 and self.resistente==False:
@@ -100,6 +100,12 @@ class Bacteria():
             return
         else:
             print("la Bacteria esta muerta")
+    def morir_antibiotico(self):
+        if self.resistente==True:
+            return
+        else:
+            self.estado==False
+
 #clase ambiente
 class Ambiente():
     def __init__(self):
@@ -118,26 +124,31 @@ class Ambiente():
             self.Colonias.append(Col)
     #actuializa la energia las bacterias con la del ambiente
     def actualizar_nutrientes(self,nutriente):
-        for posicion in self.posicion:
-            for bacteria in posicion.bacterias:
-                bacteria.energia+=nutriente       
+        for Colonia in self.Colonias:
+            for bacteria in Colonia.bacterias:
+                if bacteria.estado==True:
+                    bacteria.energia+=nutriente/(len(self.Colonia)*reporte_estado(self.Colonia))       
     #crea un random para agregar nutrientes
     def difundir_nutrientes(self):
         nuevos_nutrientes=random.randint(10,500)
         self.nutrientes+=nuevos_nutrientes
-    #sin definir
-    def aplicar_ambiente(self,n):
-        pass
+    #si esta cerca de un antibiotico muta o muere
+    def aplicar_ambiente(self,Col):
+        if Col.lugar[0]+1 in self.ambiente.posicion[2] and self.ambiente.posicion[2]==3:
+            for Bacteria in self.Bacterias:     
+                mutar(Bacteria)
+                morir_antibiotico(Bacteria)
     #crea un valor random para agregar una posicion aleatoria
-    def crear_espacio(self,n,k):
-        while n>0:
-            a=random.randint(0,4)
-            b=random.randint(0,4)
-            if [a,b]in self.posicion:
-                return
+    def crear_espacio(self, n, k):
+        while n > 0:
+            a = random.randint(0, 4)
+            b = random.randint(0, 4)
+            if [a, b] in self.posicion:
+                continue
             else:
-                self.posicion.append([a,b,k])
-                n=n-1
+                self.posicion.append([a, b, k])
+                n-= 1
+                return [a, b, k]
     
                     
 #clase colonia
@@ -175,6 +186,9 @@ class Colonia():
         for i in range(len(self.Bacterias)):
             self.Bacterias[i].energia-=10
             self.Bacterias[i].morir()
+            self.Bacterias[i].mutar()
+        if reporte_estado==0:
+            self.lugar[2]==2
         if len(self.Bacterias) > 0 and self.reporte_estado>0:
             mov = random.randint(1, 4)
             x=self.lugar[0]
@@ -198,8 +212,6 @@ class Colonia():
         for i in self.Bacterias:
             if self.Bacterias[i]==True:
                 suma_estados+=1
-            else:
-                suma_estados+=0
             total_bacterias=+1
         print(f"La cantidad de bacterias que hay vivas son {suma_estados}, de un total de {total_bacterias}")
         return total_bacterias
@@ -306,6 +318,7 @@ class simulacion(Gtk.Application):
             ambiente_simulado=Ambiente()
             while m>0:
                 temp_colonia=Colonia()
+                temp_colonia.lugar=ambiente_simulado.crear_espacio(1,1)
                 l=n
                 while l>0:
                     temp_bacteria=Bacteria()
@@ -317,9 +330,43 @@ class simulacion(Gtk.Application):
                 m-=1
                 temp_colonia.set_Ambiente(ambiente_simulado)
                 ambiente_simulado.agregar_colonia(temp_colonia)
+                ambiente_simulado.posicion.append(temp_colonia.lugar)
             
             temp_colonia.exportar_csv(archivo)                
             self.crear_grillas(ambiente_simulado)
+
+    def recolectar_datos(self,tiempo,ambiente):
+        tiempos=[]
+        bacterias_vivas=[]
+        bacterias_resistente=[]
+        for colonia in ambiente.Colonias:
+            for bacteria in colonia.Bacterias:
+                total_bacterias += 1
+                if bacteria.estado==True:
+                    vivas += 1
+                    if bacteria.resistente==True:
+                        resistentes += 1
+        tiempos.append(tiempo)
+        bacterias_vivas.append(vivas)
+        bacterias_resistente.append(resistentes)
+        return tiempos,bacterias_vivas,bacterias_resistente
+
+    def graficar_resultados():
+        fig, ax1 = plt.subplots()
+
+        ax1.set_xlabel("Pasos")
+        ax1.set_ylabel("Cantidad de bacterias vivas", color='tab:black')
+        ax1.plot(tiempos, bacterias_vivas, color='tab:black', label='total de bacterias ')
+        ax1.tick_params(axis='y', labelcolor='tab:black')
+
+        ax2= set_xlabel("Pasos") 
+        ax2.set_ylabel("Resistencia", color='tab:red')
+        ax2.plot(tiempos, porcentaje_resistentes, color='tab:red', label='Resistencia')
+        ax2.tick_params(axis='y', labelcolor='tab:red')
+
+        plt.title("crecimiento poblacional y resistencia en porcentaje en el tiempo")
+        fig.tight_layout()
+        plt.show()
 
     def mostrar_dialogo(self, title, message):
         dialogo = Gtk.MessageDialog(
