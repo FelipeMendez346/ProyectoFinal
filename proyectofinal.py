@@ -265,9 +265,13 @@ class simulacion(Gtk.Application):
         self.window.show()
 
     def Iniciar_clicked(self,Button):
+        Colonias=self.Colonias_iniciales.get_text()
         Bacterias=self.Bacterias_iniciales.get_text()
         Antibioticos=self.Antibioticos.get_text()
         Pasos=self.Cantidad_de_pasos.get_text()
+        if not re.fullmatch(r"[0-9]+", Colonias):
+            self.mostrar_dialogo("Error","La cantidad de colonias debe ser un numero entero")
+            return
         if not re.fullmatch(r"[0-9]+", Bacterias):
             self.mostrar_dialogo("Error","La cantidad de bacterias debe ser un numero entero")
             return
@@ -291,33 +295,6 @@ class simulacion(Gtk.Application):
                 m-=1
                 agregar_bacteria(temp_bacteria)                
             self.crear_grillas()
-
-        
-    def graficar(self):
-        cmap = plt.cm.get_cmap('Set1', 5)
-        fig, ax = plt.subplots(figsize=(6, 6))
-        cax = ax.matshow(grilla, cmap=cmap)
-
-        legend_elements = [
-            Patch(facecolor=cmap(1/5), label='Bacteria activa'),
-            Patch(facecolor=cmap(2/5), label='Bacteria muerta'),
-            Patch(facecolor=cmap(3/5), label='Bacteria resistente'),
-            Patch(facecolor=cmap(4/5), label='Biofilm'),]
-        ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.45, 1))
-
-        ax.set_xticks(np.arange(0, 5, 1))
-        ax.set_yticks(np.arange(0, 5, 1))
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
-        ax.grid(color='gray', linestyle='-', linewidth=0.5)
-        for i in range(5):
-            for j in range(5):                                                                                                                                                                                                                                             
-                val = grilla[i, j]
-                if val > 0:
-                    ax.text(j, i, int(val), va='center', ha='center', color='white')
-        plt.title("grilla 5x5")
-        plt.tight_layout()
-        plt.show()    
 
     def mostrar_dialogo(self, title, message):
         dialogo = Gtk.MessageDialog(
