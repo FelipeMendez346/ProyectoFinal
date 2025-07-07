@@ -72,7 +72,7 @@ class Bacteria():
             print(f"La bacteria {self.id} no consumio, ya que no se puede consumir mas nutrientes de los que hay en al celda")
     #crea una nueva bacteria a partir de una ya existente
     def dividirse(self):
-        if self.energia>=500:
+        if self.energia>=500 and self.estado==True:
             Nueva_celula= Bacteria()
             self.energia=self.energia//2
             Nueva_celula.crear_bacteria(self.raza,self.resistente)
@@ -113,7 +113,7 @@ class Ambiente():
         self.nutrientes=random.randint(100,1000)
         self.factor_ambiental=None
         self.posicion=[]
-        self.Colonias=[]
+        self.colonias=[]
 
     def set_nutrientes(self,N):
         if isinstance(N,int):
@@ -121,10 +121,10 @@ class Ambiente():
 
     def agregar_colonia(self,Col):
         if isinstance(Col,Colonia):
-            self.Colonias.append(Col)
+            self.colonias.append(Col)
     #actuializa la energia las bacterias con la del ambiente
     def actualizar_nutrientes(self,nutriente):
-        for Colonia in self.Colonias:
+        for Colonia in self.colonias:
             for bacteria in Colonia.Bacterias:
                 if bacteria.estado==True:
                     bacteria.energia+=nutriente/(len(self.colonias)*reporte_estado())       
@@ -134,32 +134,19 @@ class Ambiente():
         self.nutrientes+=nuevos_nutrientes
     #si esta cerca de un antibiotico muta o muere
     def aplicar_ambiente(self):
-        for colonia in self.Colonias:
-            x, y, _ = colonia.lugar
-            for pos in self.posicion:
-                if pos[2] == 3:
-                    ax, ay = pos[0], pos[1]
-                    if abs(ax - x) <= 1 and abs(ay - y) <= 1:
-                        for bacteria in colonia.Bacterias:
-                            bacteria.mutar()
-                            bacteria.morir_antibiotico()
+        pass
     #crea un valor random para agregar una posicion aleatoria
-    def crear_espacio(self, n, k):
-        while n > 0:
+    def crear_espacio(self, k):
             a = random.randint(0, 4)
             b = random.randint(0, 4)
-            if [a, b] in self.posicion:
-                continue
-            else:
-                self.posicion.append([a, b, k])
-                n-= 1
-                return [a, b, k]
+            self.posicion.append([a, b, k])
+            return [a, b, k]
     
                     
 #clase colonia
 class Colonia():
     def __init__(self):
-        self.Bacterias=[]
+        self.bacterias=[]
         self.ambiente=None
         self.lugar=[1,1]
         self.tipo=1 #inicializa en 1 que significa que es bacteria
@@ -175,11 +162,11 @@ class Colonia():
 
     #agrega bacteria a la colonia
     def agregar_bacteria(self,Bacteriaa):
-        self.Bacterias.append(Bacteriaa)
+        self.bacterias.append(Bacteriaa)
 
     def crear_colonia(self):
         nueva_colonia=Colonia()
-        for Bacteria in self.Bacterias:
+        for Bacteria in self.bacterias:
             if Bacteria.energia>=500:
                 nueva_bacteria=Bacteria.dividirse()
                 nueva_colonia.agregar_bacteria(nueva_bacteria)
@@ -188,13 +175,13 @@ class Colonia():
         return nueva_colonia
     #comprobacion de movimiento de la colonia en el ambiente
     def paso(self):
-        for i in range(len(self.Bacterias)):
-            self.Bacterias[i].energia-=10
-            self.Bacterias[i].morir()
-            self.Bacterias[i].mutar()
+        for i in range(len(self.bacterias)):
+            self.bacterias[i].energia-=10
+            self.bacterias[i].morir()
+            self.bacterias[i].mutar()
         if self.reporte_estado()==0:
             self.lugar[2]==2
-        if len(self.Bacterias) > 0 and self.reporte_estado>0:
+        if len(self.bacterias) > 0:
             mov = random.randint(1, 4)
             x=self.lugar[0]
             y=self.lugar[1]
@@ -215,7 +202,7 @@ class Colonia():
     def reporte_estado(self):
         suma_estados=0
         total_bacterias = 0
-        for bacteria in self.Bacterias:
+        for bacteria in self.bacterias:
             if bacteria.estado:
                 suma_estados += 1
             total_bacterias+=1
@@ -260,19 +247,19 @@ class simulacion(Gtk.Application):
         self.window.set_child(box)
 
         self.Colonias_iniciales= Gtk.Entry()
-        self.Colonias_iniciales.set_text("Indique la cantidad de Colonias que quiere comenzar")
+        self.Colonias_iniciales.set_text("3")
         box.append(self.Colonias_iniciales)
 
         self.Bacterias_iniciales = Gtk.Entry()
-        self.Bacterias_iniciales.set_text("Indique con cuantas bacterias por colonia quiere comenzar")
+        self.Bacterias_iniciales.set_text("3")
         box.append(self.Bacterias_iniciales)
         
         self.Antibioticos=Gtk.Entry()
-        self.Antibioticos.set_text("Indique cuantos antibioticos quiere colocar")
+        self.Antibioticos.set_text("3")
         box.append(self.Antibioticos)
 
         self.Cantidad_de_pasos=Gtk.Entry()
-        self.Cantidad_de_pasos.set_text("Indique cuantos pasos va a realizar")
+        self.Cantidad_de_pasos.set_text("3")
         box.append(self.Cantidad_de_pasos)
 
         self.Boton_Iniciar = Gtk.Button(label="Iniciar")
@@ -281,6 +268,24 @@ class simulacion(Gtk.Application):
 
         self.window.show()
 
+    def exportar_csv(self, archivo, ambiente, pasos):
+        with open(archivo, mode='w', newline='', encoding='utf-8') as archivo_csv:
+            escritor = csv.writer(archivo_csv)
+            escritor.writerow(['id_bacteria', 'raza', 'energia', 'es_resistente', 'esta_viva'])
+            for paso in range(pasos):
+                for colonia in ambiente.colonias:
+                    escritor.writerow([f"Colonia en [{colonia.lugar[0]},{colonia.lugar[1]}]"])
+                    for Bacteria in colonia.bacterias:
+                        escritor.writerow([
+                            Bacteria.id,
+                            Bacteria.raza,
+                            Bacteria.energia,
+                            Bacteria.resistente,
+                            Bacteria.estado
+                        ])
+                    colonia.paso()
+                self.recolectar_datos(paso+1, ambiente)
+    
     def Iniciar_clicked(self,Button):
         Colonias=self.Colonias_iniciales.get_text()
         Bacterias=self.Bacterias_iniciales.get_text()
@@ -304,57 +309,25 @@ class simulacion(Gtk.Application):
             o=int(Antibioticos)
             p=int(Pasos)
             ambiente_simulado=Ambiente()
-            while m>0:
-                temp_colonia=Colonia()
-                temp_colonia.lugar=ambiente_simulado.crear_espacio(1,1)
-                l=n
-                while l>0:
-                    temp_bacteria=Bacteria()
-                    Raz=temp_bacteria.random_raza()
-                    es=temp_bacteria.random_resistencia()
-                    temp_bacteria.crear_bacteria(Raz, es)
+            while m > 0:
+                temp_colonia = Colonia()
+                temp_colonia.lugar = ambiente_simulado.crear_espacio(1)
+                for _ in range(n):
+                    temp_bacteria = Bacteria()
+                    raza = temp_bacteria.random_raza()
+                    resistencia = temp_bacteria.random_resistencia()
+                    temp_bacteria.crear_bacteria(raza, resistencia)
                     temp_colonia.agregar_bacteria(temp_bacteria)
-                    l-=1
-                m-=1
+                m -= 1
                 temp_colonia.set_Ambiente(ambiente_simulado)
                 ambiente_simulado.agregar_colonia(temp_colonia)
                 ambiente_simulado.posicion.append(temp_colonia.lugar)
-            while o>0:
-                temp_antibiotico=ambiente_simulado.crear_espacio(1,3)
-                ambiente_simulado.posicion.append(temp_antibiotico)
-                o-=1
-            self.exportar_csv(archivo)                
-            self.crear_grillas(ambiente_simulado)
+        while o > 0:
+            ambiente_simulado.crear_espacio(3)
+            o -= 1
+        self.exportar_csv(archivo, ambiente_simulado, p)                
+        self.crear_grillas(ambiente_simulado)
 
-    def exportar_csv(self,archivo):
-        x=1
-        a=[]
-        with open(archivo,mode='w',newline='',encoding='utf-8')as archivo_csv:
-            escritor=csv.writer(archivo_csv)
-            escritor.writerow([
-                'id_bacteria', 
-                'raza', 
-                'energia', 
-                'es_resistente', 
-                'esta_viva', 
-            ])
-            while pasos>0:
-                for colonia in ambiente.Colonias:
-                    escritor.writerow([
-                        f"Colonia en [{colonia.lugar[0]},{colonia.lugar[1]}]"
-                    ])
-                    for bacteria in colonia.Bacterias:
-                        escritor.writerow([
-                            bacteria.id,
-                            bacteria.raza,
-                            bacteria.energia,
-                            bacteria.resistente,
-                            bacteria.estado
-                        ])
-                    Colonia.paso()
-                a.append(self.recolectar_datos(x,self.ambiente))
-                x+=1
-        self.graficar_resultados(a)
     
     
     def recolectar_datos(self,tiempo,ambiente):
@@ -364,8 +337,8 @@ class simulacion(Gtk.Application):
         total_bacterias=0
         resistentes=0
         vivas=0
-        for colonia in ambiente.Colonias:
-            for bacteria in colonia.Bacterias:
+        for colonia in ambiente.colonias:
+            for bacteria in colonia.bacterias:
                 total_bacterias += 1
                 if bacteria.estado==True:
                     vivas += 1
