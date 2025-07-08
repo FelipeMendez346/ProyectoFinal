@@ -2,11 +2,14 @@ import random
 import gi 
 gi.require_version("Gtk","4.0")
 from gi.repository import Gtk
-import matplotlib . pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib . patches import Patch  
+from matplotlib.patches import Patch  
 import csv
 import re
+import matplotlib
+matplotlib.use('GTK4Agg') 
+from matplotlib.backends.backend_gtk4agg import FigureCanvasGTK4Agg as FigureCanvas 
 archivo="reporte.csv"
 #clase bacteria
 class Bacteria():
@@ -78,13 +81,12 @@ class Bacteria():
             Nueva_celula.crear_bacteria(self.raza,self.resistente)
             Nueva_celula.set_energia(self.energia)
             return Nueva_celula
+        else:
+            pass
     #random para mutacion de resistencia a antibioticos
     def mutar(self):
         a=random.randint(1,10)
-        if a<=4 and self.resistente==True:
-            self.resistente=False
-            print("Se ha mutado y se ha quitado la resistencia a antibioticos")
-        if a==7 and self.resistente==False:
+        if a<=4 and self.resistente==False:
             self.resistente=True
             print("Se ha mutado y se ha agregado la resistencia a antibioticos")
         else:
@@ -175,6 +177,7 @@ class Colonia():
         return nueva_colonia
     #comprobacion de movimiento de la colonia en el ambiente
     def paso(self):
+        self.reporte_estado()
         for i in range(len(self.bacterias)):
             self.bacterias[i].energia-=10
             self.bacterias[i].morir()
@@ -197,15 +200,24 @@ class Colonia():
             elif mov == 4 and y > 0:
                 NC=self.crear_colonia()
                 NC.set_lugar(self.lugar[1]-1)
-            self.ambiente.difundir_nutrientes() 
+            else:
+                for Bacteria in self.bacterias:
+                    self.bacterias.append(Bacteria.dividirse(Bacteria))
+            self.ambiente.difundir_nutrientes()
+
     #reporte de si existen bacterias vivas o estan muertas en la casilla             
     def reporte_estado(self):
         suma_estados=0
         total_bacterias = 0
+        resiste=0
         for bacteria in self.bacterias:
-            if bacteria.estado:
+            if bacteria.estado==True:
                 suma_estados += 1
+            if bacteria.es_resistente==True:
+                resiste+=1
             total_bacterias+=1
+        if resiste==suma_estados:
+            self.tipo=3            
         print(f"La cantidad de bacterias que hay vivas son {suma_estados}, de un total de {total_bacterias}")
         return total_bacterias
     
@@ -323,10 +335,10 @@ class simulacion(Gtk.Application):
                 ambiente_simulado.agregar_colonia(temp_colonia)
                 ambiente_simulado.posicion.append(temp_colonia.lugar)
         while o > 0:
-            ambiente_simulado.crear_espacio(3)
+            ambiente_simulado.crear_espacio(4)
             o -= 1
         self.exportar_csv(archivo, ambiente_simulado, p)                
-        self.crear_grillas(ambiente_simulado)
+        self.graficar_resultados(ambiente_simulado)
 
     
     
@@ -349,31 +361,42 @@ class simulacion(Gtk.Application):
         bacterias_resistente=(resistentes/vivas*100)
         return [tiempos,bacterias_vivas,bacterias_resistente]
 
-    def graficar_resultados(self,a):
-        paso = []
-        vivas = []
-        resistentes = []
-        for i in a:
-            paso.append(a[i][0])
-            vivas.append(a[i][1])
-            resistentes.append(a[i][2])
+    def graficar_resultados(self, ambiente):
+        # Ensure grilla is a numpy array
+        grilla=self.crear_grillas(ambiente)
 
-        fig, ax1 = plt.subplots()
+        # Define the colormap
+        cmap = plt.cm.get_cmap('Set1', 5)
+        fig, ax = plt.subplots(figsize=(6, 6))
+        cax = ax.matshow(grilla, cmap=cmap)
 
-        ax1.set_xlabel("Pasos")
-        ax1.set_ylabel("Cantidad de bacterias vivas", color='tab:black')
-        ax1.plot(paso,vivas, color='tab:black', label='total de bacterias ')
-        ax1.tick_params(axis='y', labelcolor='tab:black')
+        # Create legend elements
+        legend_elements = [
+            Patch(facecolor=cmap(1/5), label='Bacteria activa'),
+            Patch(facecolor=cmap(2/5), label='Bacteria Muerta'),
+            Patch(facecolor=cmap(3/5), label='Bacteria Resistente'),
+            Patch(facecolor=cmap(4/5), label='Bacteria Biofilm'),
+        ]
+        ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.45, 1))
 
-        ax2= ax1.twinx()
-        ax2.set_xlabel("Pasos")
-        ax2.set_ylabel("Resistencia", color='tab:red')
-        ax2.plot(paso,resistentes, color='tab:red', label='Resistencia')
-        ax2.tick_params(axis='y', labelcolor='tab:red')
+        # Set ticks
+        ax.set_xticks(np.arange(0, 5, 1))
+        ax.set_yticks(np.arange(0, 5, 1))
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.grid(color='gray', linestyle='-', linewidth=0.5)
 
-        plt.title("crecimiento poblacional y resistencia en porcentaje en el tiempo")
-        fig.tight_layout()
+        # Annotate the cells with values
+        for i in range(grilla.shape[0]):
+            for j in range(grilla.shape[1]):
+                val = grilla[i, j]
+                if val > 0:
+                    ax.text(j, i, int(val), va='center', ha='center', color='white')
+
+        plt.title("Grilla 5x5")
+        plt.tight_layout()
         plt.show()
+
 
     def mostrar_dialogo(self, title, message):
         dialogo = Gtk.MessageDialog(

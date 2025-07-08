@@ -1,37 +1,37 @@
 id_bacteria,raza,energia,es_resistente,esta_viva
-"Colonia en [1,2]"
-1760,Espirilos,831,True,True
-16,cocos,432,True,True
-1656,Bacilo,175,True,True
-"Colonia en [3,2]"
-1447,cocos,957,True,True
-1269,Bacilo,699,False,True
-346,Espirilos,733,False,True
-"Colonia en [0,1]"
-1946,cocos,170,True,True
-865,cocos,365,True,True
-1891,cocos,501,True,True
-"Colonia en [1,2]"
-1760,Espirilos,410,False,True
-16,cocos,422,True,True
-1656,Bacilo,165,True,True
-"Colonia en [3,2]"
-1447,cocos,473,False,True
-1269,Bacilo,344,False,True
-346,Espirilos,361,False,True
-"Colonia en [0,1]"
-1946,cocos,160,False,True
-865,cocos,355,True,True
-1891,cocos,491,True,True
-"Colonia en [1,2]"
-1760,Espirilos,400,True,True
-16,cocos,412,True,True
-1656,Bacilo,155,True,True
-"Colonia en [3,2]"
-1447,cocos,463,True,True
-1269,Bacilo,334,False,True
-346,Espirilos,351,False,True
-"Colonia en [0,1]"
-1946,cocos,150,False,True
-865,cocos,345,True,True
-1891,cocos,481,False,True
+"Colonia en [3,3]"
+1355,Espirilos,992,False,True
+1086,cocos,854,False,True
+558,cocos,763,True,True
+"Colonia en [1,3]"
+836,cocos,564,True,True
+1530,cocos,939,True,True
+257,Bacilo,170,False,True
+"Colonia en [4,1]"
+82,Bacilo,535,False,True
+1527,cocos,113,True,True
+1746,Bacilo,601,False,True
+"Colonia en [3,3]"
+1355,Espirilos,491,False,True
+1086,cocos,422,True,True
+558,cocos,376,False,True
+"Colonia en [1,3]"
+836,cocos,277,True,True
+1530,cocos,464,True,True
+257,Bacilo,160,False,True
+"Colonia en [4,1]"
+82,Bacilo,262,False,True
+1527,cocos,103,True,True
+1746,Bacilo,295,False,True
+"Colonia en [3,3]"
+1355,Espirilos,481,False,True
+1086,cocos,412,True,True
+558,cocos,366,False,True
+"Colonia en [1,3]"
+836,cocos,267,True,True
+1530,cocos,454,True,True
+257,Bacilo,150,False,True
+"Colonia en [4,1]"
+82,Bacilo,252,False,True
+1527,cocos,93,False,False
+1746,Bacilo,285,False,True
