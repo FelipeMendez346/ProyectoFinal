@@ -148,7 +148,8 @@ class Ambiente():
     
                     
 #clase colonia
-class Colonia():
+
+class Colonia(Espacio):
     def __init__(self):
         self.bacterias=[]
         self.ambiente=None
@@ -176,7 +177,10 @@ class Colonia():
                 nueva_colonia.agregar_bacteria(nueva_bacteria)
         nueva_colonia.set_Ambiente(self.ambiente)
         nueva_colonia.set_tipo=self.tipo
-        return nueva_colonia
+        if self.reporte_estado==0:
+            return
+        else:
+            return nueva_colonia
     #comprobacion de movimiento de la colonia en el ambiente
     def paso(self):
         self.reporte_estado()
@@ -185,14 +189,14 @@ class Colonia():
             self.bacterias[i].morir()
             self.bacterias[i].mutar()
         if self.reporte_estado()==0:
-            self.lugar[2]==2
-        if (self.ambiente.grilla[self.lugar[0]+1][3]==4) or (self.ambiente.grilla[self.lugar[0]-1][3]==4) or (self.ambiente.grilla[self.lugar[1]+1][3]==4) or (self.ambiente.grilla[self.lugar[1]-1][3]==4):
-            for Bacteria in self.bacterias:
-                self.Bacteria.morir_antibiotico()               
+            self.lugar[2]=2               
         if len(self.bacterias) > 0:
             mov = random.randint(1, 4)
             x=self.lugar[0]
             y=self.lugar[1]
+            if (self.ambiente.grilla[x+1][y][2]==4) or (self.ambiente.grilla[x-1][y][2]==4) or (self.ambiente.grilla[x][y+1][2]==4) or (self.ambiente.grilla[x][y-1][2]==4):
+                for Bacteria in self.bacterias:
+                    self.Bacteria.morir_antibiotico()
             if mov == 1 and x < 4:
                 NC=self.crear_colonia()
                 NC.set_lugar(self.lugar[0]+1)
@@ -222,9 +226,11 @@ class Colonia():
                 resiste+=1
             total_bacterias+=1
         if resiste==suma_estados:
-            self.tipo=3            
+            self.tipo=3
+        if suma_estados==0:
+            self.tipo=2            
         print(f"La cantidad de bacterias que hay vivas son {suma_estados}, de un total de {total_bacterias}")
-        return total_bacterias
+        return suma_estados
     
     #exportacion de archivo cvs
     
@@ -342,7 +348,7 @@ class simulacion(Gtk.Application):
         while o > 0:
             ambiente_simulado.crear_espacio(4)
             o -= 1
-        self.exportar_csv(archivo, ambiente_simulado, p)                
+        self.exportar_csv(archivo,ambiente_simulado,p)                
         self.graficar_resultados(ambiente_simulado)
 
     
