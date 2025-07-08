@@ -106,7 +106,9 @@ class Bacteria():
         if self.resistente==True:
             return
         else:
-            self.estado=False
+            muerte=random.randint(1,5)
+            if muerte<=2:
+                self.estado=False
 
 #clase ambiente
 class Ambiente():
@@ -184,6 +186,9 @@ class Colonia():
             self.bacterias[i].mutar()
         if self.reporte_estado()==0:
             self.lugar[2]==2
+        if (self.ambiente.grilla[self.lugar[0]+1][3]==4) or (self.ambiente.grilla[self.lugar[0]-1][3]==4) or (self.ambiente.grilla[self.lugar[1]+1][3]==4) or (self.ambiente.grilla[self.lugar[1]-1][3]==4):
+            for Bacteria in self.bacterias:
+                self.Bacteria.morir_antibiotico()               
         if len(self.bacterias) > 0:
             mov = random.randint(1, 4)
             x=self.lugar[0]
@@ -213,7 +218,7 @@ class Colonia():
         for bacteria in self.bacterias:
             if bacteria.estado==True:
                 suma_estados += 1
-            if bacteria.es_resistente==True:
+            if bacteria.resistente==True:
                 resiste+=1
             total_bacterias+=1
         if resiste==suma_estados:
