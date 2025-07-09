@@ -1,5 +1,28 @@
-id_bacteria,raza,energia,es_resistente,esta_viva
-"Colonia en [2,4]"
-1581,Bacilo,423,False,True
-615,cocos,741,False,True
-1934,Espirilos,469,False,True
+id_bacteria,raza,energia,es_resistente,esta_viva,Cuadrilla,Tiempo(en pasos)
+461,Espirilos,799,False,True,"[0, 4, 1]",0
+1911,Bacilo,243,True,True,"[0, 4, 1]",0
+1885,cocos,840,False,True,"[0, 4, 1]",0
+700,Bacilo,965,False,True,"[3, 2, 1]",1
+625,Espirilos,554,True,True,"[3, 2, 1]",1
+531,Bacilo,587,False,True,"[3, 2, 1]",1
+192,Bacilo,889,True,True,"[3, 4, 1]",2
+710,cocos,785,False,True,"[3, 4, 1]",2
+1577,Espirilos,790,False,True,"[3, 4, 1]",2
+461,Espirilos,799,False,True,"[0, 4, 1]",3
+1911,Bacilo,243,True,True,"[0, 4, 1]",3
+1885,cocos,840,False,True,"[0, 4, 1]",3
+700,Bacilo,965,False,True,"[3, 2, 1]",4
+625,Espirilos,554,True,True,"[3, 2, 1]",4
+531,Bacilo,587,False,True,"[3, 2, 1]",4
+192,Bacilo,889,True,True,"[3, 4, 1]",5
+710,cocos,785,False,True,"[3, 4, 1]",5
+1577,Espirilos,790,False,True,"[3, 4, 1]",5
+461,Espirilos,799,False,True,"[0, 4, 1]",6
+1911,Bacilo,243,True,True,"[0, 4, 1]",6
+1885,cocos,840,False,True,"[0, 4, 1]",6
+700,Bacilo,965,False,True,"[3, 2, 1]",7
+625,Espirilos,554,True,True,"[3, 2, 1]",7
+531,Bacilo,587,False,True,"[3, 2, 1]",7
+192,Bacilo,889,True,True,"[3, 4, 1]",8
+710,cocos,785,False,True,"[3, 4, 1]",8
+1577,Espirilos,790,False,True,"[3, 4, 1]",8

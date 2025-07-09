@@ -7,9 +7,8 @@ import numpy as np
 from matplotlib.patches import Patch  
 import csv
 import re
-import matplotlib
-matplotlib.use('GTK4Agg') 
-from matplotlib.backends.backend_gtk4agg import FigureCanvasGTK4Agg as FigureCanvas 
+import pandas as pd
+
 archivo="reporte.csv"
 #clase bacteria
 class Bacteria():
@@ -113,15 +112,15 @@ class Bacteria():
 #clase ambiente
 class Ambiente():
     def __init__(self):
-        self.grilla=None
+        self.grilla=np.zeros((5,5))
         self.nutrientes=random.randint(100,1000)
         self.factor_ambiental=None
         self.posicion=[]
         self.colonias=[]
 
-    def set_nutrientes(self,N):
+    def alimentar(self,N):
         if isinstance(N,int):
-            self.nutrientes=N
+            self.nutrientes+=N
 
     def agregar_colonia(self,Col):
         if isinstance(Col,Colonia):
@@ -131,7 +130,7 @@ class Ambiente():
         for Colonia in self.colonias:
             for bacteria in Colonia.Bacterias:
                 if bacteria.estado==True:
-                    bacteria.energia+=nutriente/(len(self.colonias)*reporte_estado())       
+                    bacteria.energia+=nutriente/(len(self.colonias)*Colonia.reporte_estado())       
     #crea un random para agregar nutrientes
     def difundir_nutrientes(self):
         nuevos_nutrientes=random.randint(10,500)
@@ -148,14 +147,13 @@ class Ambiente():
     
                     
 #clase colonia
-
-class Colonia(Espacio):
+class Colonia():
     def __init__(self):
         self.bacterias=[]
         self.ambiente=None
         self.lugar=[1,1]
-        self.tipo=1 #inicializa en 1 que significa que es bacteria
-    
+        self.tipo=1
+
     def set_Ambiente(self,ambiente):
         self.ambiente=ambiente
 
@@ -176,7 +174,7 @@ class Colonia(Espacio):
                 nueva_bacteria=Bacteria.dividirse()
                 nueva_colonia.agregar_bacteria(nueva_bacteria)
         nueva_colonia.set_Ambiente(self.ambiente)
-        nueva_colonia.set_tipo=self.tipo
+        nueva_colonia.set_tipo(self.tipo)
         if self.reporte_estado==0:
             return
         else:
@@ -191,27 +189,30 @@ class Colonia(Espacio):
         if self.reporte_estado()==0:
             self.lugar[2]=2               
         if len(self.bacterias) > 0:
-            mov = random.randint(1, 4)
+            mov = random.randint(1,4)
             x=self.lugar[0]
             y=self.lugar[1]
-            if (self.ambiente.grilla[x+1][y][2]==4) or (self.ambiente.grilla[x-1][y][2]==4) or (self.ambiente.grilla[x][y+1][2]==4) or (self.ambiente.grilla[x][y-1][2]==4):
-                for Bacteria in self.bacterias:
-                    self.Bacteria.morir_antibiotico()
-            if mov == 1 and x < 4:
-                NC=self.crear_colonia()
-                NC.set_lugar(self.lugar[0]+1)
-            elif mov == 2 and y < 4:
-                NC=self.crear_colonia()
-                NC.set_lugar(self.lugar[1]+1)  
-            elif mov == 3 and x > 0:
-                NC=self.crear_colonia()
-                NC.set_lugar(self.lugar[0]-1) 
-            elif mov == 4 and y > 0:
-                NC=self.crear_colonia()
-                NC.set_lugar(self.lugar[1]-1)
-            else:
-                for Bacteria in self.bacterias:
-                    self.bacterias.append(Bacteria.dividirse(Bacteria))
+            if x<4 and y<4 and x>0 and x>0:
+                if (self.ambiente.grilla[x+1][y]==4) or (self.ambiente.grilla[x-1][y]==4) or (self.ambiente.grilla[x][y+1]==4) or (self.ambiente.grilla[x][y-1]==4):
+                    for Bacteria in self.bacterias: 
+                        Bacteria.morir_antibiotico()
+                if mov == 1 and x < 4:
+                    NC=self.crear_colonia()
+                    NC.set_lugar(self.lugar[0]+1)
+                elif mov == 2 and y < 4:
+                    NC=self.crear_colonia()
+                    NC.set_lugar(self.lugar[1]+1)  
+                elif mov == 3 and x > 0:
+                    NC=self.crear_colonia()
+                    NC.set_lugar(self.lugar[0]-1) 
+                elif mov == 4 and y > 0:
+                    NC=self.crear_colonia()
+                    NC.set_lugar(self.lugar[1]-1)
+                else:
+                    for Bacteria in self.bacterias:
+                        Bacteria.dividirse()
+            self.ambiente.posicion.append(NC.lugar)
+            self.ambiente.colonias.append(NC)
             self.ambiente.difundir_nutrientes()
 
     #reporte de si existen bacterias vivas o estan muertas en la casilla             
@@ -292,22 +293,31 @@ class simulacion(Gtk.Application):
         self.window.show()
 
     def exportar_csv(self, archivo, ambiente, pasos):
+        n=pasos
+        paso=0
+        Total_datos=[]
         with open(archivo, mode='w', newline='', encoding='utf-8') as archivo_csv:
             escritor = csv.writer(archivo_csv)
-            escritor.writerow(['id_bacteria', 'raza', 'energia', 'es_resistente', 'esta_viva'])
-            for paso in range(pasos):
+            escritor.writerow(['id_bacteria', 'raza', 'energia', 'es_resistente', 'esta_viva','Cuadrilla','Tiempo(en pasos)'])
+            while n>0: 
                 for colonia in ambiente.colonias:
-                    escritor.writerow([f"Colonia en [{colonia.lugar[0]},{colonia.lugar[1]}]"])
                     for Bacteria in colonia.bacterias:
                         escritor.writerow([
                             Bacteria.id,
                             Bacteria.raza,
                             Bacteria.energia,
                             Bacteria.resistente,
-                            Bacteria.estado
+                            Bacteria.estado,
+                            colonia.lugar,
+                            paso
                         ])
-                    colonia.paso()
-                self.recolectar_datos(paso+1, ambiente)
+                    paso+=1
+                    datos_colonia=self.recolectar_datos(paso, ambiente)
+                    Total_datos.append(datos_colonia)
+                n-=1
+        return Total_datos
+
+        
     
     def Iniciar_clicked(self,Button):
         Colonias=self.Colonias_iniciales.get_text()
@@ -348,13 +358,13 @@ class simulacion(Gtk.Application):
         while o > 0:
             ambiente_simulado.crear_espacio(4)
             o -= 1
-        self.exportar_csv(archivo,ambiente_simulado,p)                
-        self.graficar_resultados(ambiente_simulado)
+        self.crear_grillas(ambiente_simulado)
+        self.exportar_csv(archivo,ambiente_simulado,p)
+
 
     
     
     def recolectar_datos(self,tiempo,ambiente):
-        tiempos=0
         bacterias_vivas=0
         bacterias_resistente=0
         total_bacterias=0
@@ -367,44 +377,25 @@ class simulacion(Gtk.Application):
                     vivas += 1
                     if bacteria.resistente==True:
                         resistentes += 1
-        tiempos=tiempo
         bacterias_vivas=vivas
-        bacterias_resistente=(resistentes/vivas*100)
-        return [tiempos,bacterias_vivas,bacterias_resistente]
+        if vivas!=0:
+            bacterias_resistente=(resistentes/vivas*100)
+        else:
+            bacterias_resistente=0
+        return [tiempo,bacterias_vivas,bacterias_resistente]
 
-    def graficar_resultados(self, ambiente):
-        # Ensure grilla is a numpy array
-        grilla=self.crear_grillas(ambiente)
+    def graficar_crecimiento(self,Datos):
+        df=pd.read_csv(archivo)
+        columnas_id=df[['id_bacteria']]
+        columnas_raza=df[['raza']]
+        columnas_energia=df[['energia']]
+        columnas_resistencia=df[['es_resistente']]
+        columnas_Viva=[['esta_viva']]
+        columna_tiempo=[['Paso']]
 
-        # Define the colormap
-        cmap = plt.cm.get_cmap('Set1', 5)
-        fig, ax = plt.subplots(figsize=(6, 6))
-        cax = ax.matshow(grilla, cmap=cmap)
-
-        # Create legend elements
-        legend_elements = [
-            Patch(facecolor=cmap(1/5), label='Bacteria activa'),
-            Patch(facecolor=cmap(2/5), label='Bacteria Muerta'),
-            Patch(facecolor=cmap(3/5), label='Bacteria Resistente'),
-            Patch(facecolor=cmap(4/5), label='Bacteria Biofilm'),
-        ]
-        ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.45, 1))
-
-        # Set ticks
-        ax.set_xticks(np.arange(0, 5, 1))
-        ax.set_yticks(np.arange(0, 5, 1))
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
-        ax.grid(color='gray', linestyle='-', linewidth=0.5)
-
-        # Annotate the cells with values
-        for i in range(grilla.shape[0]):
-            for j in range(grilla.shape[1]):
-                val = grilla[i, j]
-                if val > 0:
-                    ax.text(j, i, int(val), va='center', ha='center', color='white')
-
-        plt.title("Grilla 5x5")
+        plt.figure(figsize=(10,4))
+        plt.plot(paso)
+        plt.title("Grafica Bacterias/Tiempo")
         plt.tight_layout()
         plt.show()
 
